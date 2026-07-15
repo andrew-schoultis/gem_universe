@@ -1,197 +1,335 @@
-// Mergington High School - Computer Science Portal JavaScript
+// Gem Universe - THREE.js Gem Rendering Engine
+// Referenced instructions from .github/instructions/project.instructions.md
 
-class AssignmentPortal {
-  constructor() {
-    this.config = null;
-    this.init();
+console.log('Script loaded, waiting for THREE.js');
+
+// Scene configuration
+let scene, camera, renderer, gem, controls;
+const gemProperties = {
+  color: '#FF6B6B',
+  roughness: 0.1,
+  metalness: 0.0,
+  shape: 'diamond'
+};
+
+// Initialize the THREE.js scene
+function initScene() {
+  const container = document.getElementById('gemCanvasContainer');
+  if (!container) {
+    console.error('Canvas container not found!');
+    return;
   }
+  
+  // Get container dimensions
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  
+  // Create scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1a1a2e);
+  console.log('Scene created with background color');
+  
+  // Setup camera with correct aspect ratio
+  camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  camera.position.z = 2;
+  console.log('Camera positioned at:', camera.position);
+  
+  // Setup renderer
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(width, height);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+  renderer.setPixelRatio(window.devicePixelRatio);
+  container.appendChild(renderer.domElement);
+  console.log('Renderer initialized and added to container, size:', width, 'x', height);
+  
+  // Add lighting - realistic gem lighting setup
+  addLighting();
+  
+  // Create initial gem
+  createGem();
+  
+  // Setup animation loop
+  animate();
+  console.log('Animation loop started');
+  
+  // Handle window resize
+  window.addEventListener('resize', onWindowResize);
+}
 
-  async init() {
-    try {
-      await this.loadConfig();
-      this.renderCourseInfo();
-      this.renderNextDueAssignment();
-      this.renderAllAssignments();
-    } catch (error) {
-      console.error("Failed to initialize portal:", error);
-      this.showError("Failed to load course information");
+// Add realistic lighting for gemstone rendering
+function addLighting() {
+  // Main directional light (key light)
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  keyLight.position.set(5, 5, 5);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.width = 2048;
+  keyLight.shadow.mapSize.height = 2048;
+  scene.add(keyLight);
+  
+  // Fill light to reduce harsh shadows
+  const fillLight = new THREE.DirectionalLight(0x7f7fff, 0.6);
+  fillLight.position.set(-5, 3, -5);
+  scene.add(fillLight);
+  
+  // Rim light for dramatic effect
+  const rimLight = new THREE.DirectionalLight(0xff00ff, 0.4);
+  rimLight.position.set(-3, 0, 5);
+  scene.add(rimLight);
+  
+  // Ambient light for base illumination
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+  scene.add(ambientLight);
+}
+
+// Create gem geometry with realistic diamond cut
+function createGemGeometry(shape = 'diamond') {
+  let geometry;
+  
+  if (shape === 'diamond') {
+    // Create diamond/brilliant cut gem
+    geometry = new THREE.IcosahedronGeometry(0.8, 4);
+  } else if (shape === 'emerald') {
+    // Rectangular cushion cut
+    geometry = new THREE.BoxGeometry(0.6, 0.9, 0.45);
+  } else if (shape === 'round') {
+    // Round brilliant cut
+    geometry = new THREE.SphereGeometry(0.8, 32, 32);
+  } else if (shape === 'marquise') {
+    // Elongated diamond shape
+    const points = [];
+    for (let i = 0; i < 32; i++) {
+      const angle = (i / 32) * Math.PI * 2;
+      const x = Math.cos(angle) * 1.2;
+      const y = Math.sin(angle) * 0.8;
+      points.push(new THREE.Vector2(x, y));
     }
+    geometry = new THREE.LatheGeometry(points, 32);
+  } else {
+    geometry = new THREE.OctahedronGeometry(0.8, 2);
   }
+  
+  return geometry;
+}
 
-  async loadConfig() {
-    const response = await fetch("config.json");
-    if (!response.ok) {
-      throw new Error("Failed to load configuration");
-    }
-    this.config = await response.json();
+// Create the gem with realistic material properties
+function createGem() {
+  // Remove existing gem
+  if (gem) {
+    scene.remove(gem);
   }
+  
+  console.log('Creating gem with properties:', gemProperties);
+  const geometry = createGemGeometry(gemProperties.shape);
+  console.log('Geometry created');
+  
+  // Realistic gemstone material using physical material with enhanced shine
+  const material = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(gemProperties.color),
+    metalness: gemProperties.metalness,
+    roughness: Math.max(0.02, gemProperties.roughness * 0.3), // Much shinier
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.05, // Very shiny clear coat
+    ior: 2.42, // Refractive index of diamond
+    transmission: 0.95, // More transparent
+    thickness: 1.0,
+    envMapIntensity: 2.0, // Stronger reflections
+    reflectivity: 1.0,
+    side: THREE.DoubleSide,
+  });
+  
+  gem = new THREE.Mesh(geometry, material);
+  gem.castShadow = true;
+  gem.receiveShadow = true;
+  scene.add(gem);
+  console.log('Gem added to scene');
+}
 
-  getAssignmentStatus(assignment) {
-    if (!assignment.dueDate) return 'active'; // No due date means always active
-    
-    const currentDate = new Date();
-    const assignmentDueDate = new Date(assignment.dueDate);
-    
-    // Set both dates to start of day for accurate comparison
-    currentDate.setHours(0, 0, 0, 0);
-    assignmentDueDate.setHours(0, 0, 0, 0);
-    
-    return assignmentDueDate >= currentDate ? 'active' : 'overdue';
+// Parse gem description and update properties
+function parseGemDescription(description) {
+  console.log('=== PARSING GEM DESCRIPTION ===');
+  console.log('Description:', description);
+  const desc = description.toLowerCase();
+  
+  // Color detection
+  if (desc.includes('red') || desc.includes('ruby')) {
+    gemProperties.color = '#E71930';
+  } else if (desc.includes('blue') || desc.includes('sapphire')) {
+    gemProperties.color = '#0047AB';
+  } else if (desc.includes('green') || desc.includes('emerald')) {
+    gemProperties.color = '#50C878';
+  } else if (desc.includes('yellow') || desc.includes('gold')) {
+    gemProperties.color = '#FFD700';
+  } else if (desc.includes('purple') || desc.includes('amethyst')) {
+    gemProperties.color = '#9966CC';
+  } else if (desc.includes('pink')) {
+    gemProperties.color = '#FF69B4';
+  } else if (desc.includes('white') || desc.includes('clear') || desc.includes('diamond')) {
+    gemProperties.color = '#FFFFFF';
   }
-
-  renderCourseInfo() {
-    const { course } = this.config;
-    document.getElementById("course-title").textContent = course.title;
-    document.getElementById("course-info").textContent = course.school;
-    document.getElementById("course-description").textContent = course.description;
-    document.title = `${course.school} - ${course.title}`;
+  
+  // Shape detection
+  if (desc.includes('round')) {
+    gemProperties.shape = 'round';
+  } else if (desc.includes('emerald')) {
+    gemProperties.shape = 'emerald';
+  } else if (desc.includes('marquise')) {
+    gemProperties.shape = 'marquise';
+  } else {
+    gemProperties.shape = 'diamond';
   }
-
-  renderNextDueAssignment() {
-    const { assignments } = this.config;
-    const nextDueContainer = document.getElementById("next-due-assignment");
-    
-    // Find the next assignment due (active assignments only)
-    const activeAssignments = assignments.filter(a => this.getAssignmentStatus(a) === 'active' && a.dueDate);
-    if (activeAssignments.length === 0) {
-      nextDueContainer.innerHTML = '<div class="loading">No upcoming assignments</div>';
-      return;
-    }
-
-    const currentDate = new Date();
-    const sortedAssignments = activeAssignments.sort((a, b) => {
-      const dateA = new Date(a.dueDate);
-      const dateB = new Date(b.dueDate);
-      return dateA - dateB;
-    });
-
-    // Find the next due assignment (either due today or in the future)
-    let nextAssignment = sortedAssignments.find(a => {
-      const dueDate = new Date(a.dueDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      dueDate.setHours(0, 0, 0, 0);
-      return dueDate >= today;
-    });
-
-    // If no future assignments, show the most recently due
-    if (!nextAssignment) {
-      nextAssignment = sortedAssignments[sortedAssignments.length - 1];
-    }
-
-    nextDueContainer.innerHTML = this.createNextDueCard(nextAssignment);
+  
+  // Clarity/Transparency detection
+  if (desc.includes('opaque') || desc.includes('cloudy')) {
+    gemProperties.roughness = 0.6;
+    gemProperties.metalness = 0.3;
+  } else if (desc.includes('clear') || desc.includes('transparent')) {
+    gemProperties.roughness = 0.05;
+    gemProperties.metalness = 0.0;
   }
+  
+  console.log('Final gem properties:', gemProperties);
+  createGem();
+  console.log('=== GEM DESCRIPTION PARSING COMPLETE ===');
+}
 
-  createNextDueCard(assignment) {
-    const dueDate = new Date(assignment.dueDate);
-    const currentDate = new Date();
-    const timeDiff = dueDate - currentDate;
-    const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-    
-    let urgencyClass = 'low';
-    let urgencyText = `${daysDiff} days remaining`;
-    
-    if (daysDiff < 0) {
-      urgencyClass = 'high';
-      urgencyText = `${Math.abs(daysDiff)} days overdue`;
-    } else if (daysDiff === 0) {
-      urgencyClass = 'high';
-      urgencyText = 'Due today!';
-    } else if (daysDiff <= 3) {
-      urgencyClass = 'high';
-      urgencyText = `${daysDiff} days remaining`;
-    } else if (daysDiff <= 7) {
-      urgencyClass = 'medium';
-      urgencyText = `${daysDiff} days remaining`;
-    }
-
-    const formattedDate = dueDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-
-    return `
-      <h3>${assignment.title}</h3>
-      <p>${assignment.description}</p>
-      <div class="next-due-meta">
-        <div class="next-due-date">📅 Due: ${formattedDate}</div>
-        <div class="next-due-urgency ${urgencyClass}">⏰ ${urgencyText}</div>
-      </div>
-      <div class="next-due-actions">
-        <a href="assets/pages/assignment.html?id=${assignment.id}" class="btn btn-next-due">
-          Start Assignment →
-        </a>
-      </div>
-    `;
+// Animation loop with gem rotation
+function animate() {
+  requestAnimationFrame(animate);
+  
+  if (gem) {
+    // Smooth rotation for visual appeal
+    gem.rotation.x += 0.003;
+    gem.rotation.y += 0.005;
   }
-
-  renderAllAssignments() {
-    const assignmentsList = document.getElementById("assignments-list");
-    const { assignments } = this.config;
-
-    if (!assignments || assignments.length === 0) {
-      assignmentsList.innerHTML = '<div class="loading">No assignments available</div>';
-      return;
-    }
-
-    // Sort assignments by due date: latest due date first
-    const sortedAssignments = [...assignments].sort((a, b) => {
-      // If one has no due date, put it at the end
-      if (!a.dueDate && !b.dueDate) return 0;
-      if (!a.dueDate) return 1;
-      if (!b.dueDate) return -1;
-
-      const dateA = new Date(a.dueDate);
-      const dateB = new Date(b.dueDate);
-      
-      return dateB - dateA;
-    });
-
-    const assignmentRows = sortedAssignments
-      .map((assignment) => this.createAssignmentRow(assignment))
-      .join("");
-
-    assignmentsList.innerHTML = assignmentRows;
-  }
-
-  createAssignmentRow(assignment) {
-    const dueDate = assignment.dueDate
-      ? new Date(assignment.dueDate).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric'
-        })
-      : "No due date";
-
-    const dynamicStatus = this.getAssignmentStatus(assignment);
-
-    return `
-      <div class="assignment-row">
-        <div class="assignment-info">
-          <h3>${assignment.title}</h3>
-          <p>${assignment.description}</p>
-          <div class="assignment-quick-meta">
-            <span class="due-date">📅 ${dueDate}</span>
-            <span class="status ${dynamicStatus}">${dynamicStatus}</span>
-          </div>
-        </div>
-        <div class="assignment-actions-compact">
-          <a href="assets/pages/assignment.html?id=${assignment.id}" class="btn btn-primary">
-            View Details
-          </a>
-        </div>
-      </div>
-    `;
-  }
-
-  showError(message) {
-    const assignmentsList = document.getElementById("assignments-list");
-    assignmentsList.innerHTML = `<div class="error">${message}</div>`;
+  
+  renderer.render(scene, camera);
+  
+  // Log render info every 60 frames (about once per second at 60fps)
+  if (!window.renderCount) window.renderCount = 0;
+  if (++window.renderCount % 60 === 0) {
+    console.log('Rendering..., gem visible:', !!gem, 'at position:', gem ? gem.position : 'no gem');
   }
 }
 
-// Initialize the portal when the page loads
-document.addEventListener("DOMContentLoaded", () => {
-  new AssignmentPortal();
-});
+// Handle window resize responsively
+function onWindowResize() {
+  const container = document.getElementById('gemCanvasContainer');
+  if (!container || !camera || !renderer) return;
+  
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+// Setup form event listeners
+function setupFormListener() {
+  const form = document.getElementById('gemForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const resultContainer = document.getElementById('resultContainer');
+  const errorContainer = document.getElementById('errorContainer');
+  
+  console.log('Setting up form listener, form element:', form);
+  
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log('Form submitted');
+      
+      const description = document.getElementById('gemDescription').value.trim();
+      console.log('Description:', description);
+      
+      if (!description) {
+        console.log('No description provided');
+        return;
+      }
+      
+      // Hide previous results
+      resultContainer.classList.add('hidden');
+      errorContainer.classList.add('hidden');
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.innerHTML = '<span class="loading-spinner"></span>Rendering...';
+      
+      // Small delay to show loading state and ensure animation frame
+      setTimeout(() => {
+        try {
+          console.log('Parsing gem description');
+          parseGemDescription(description);
+          console.log('Gem description parsed');
+          
+          // Show success result
+          resultContainer.classList.remove('hidden');
+          
+          // Restore button
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        } catch (error) {
+          console.error('Error rendering gem:', error);
+          // Show error
+          document.getElementById('errorContent').textContent = `Error: ${error.message}`;
+          errorContainer.classList.remove('hidden');
+          
+          // Restore button
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      }, 300);
+    });
+  } else {
+    console.error('Form element not found!');
+  }
+}
+
+// Wait for THREE.js to be available
+function waitForTHREE(attempts = 0) {
+  if (typeof THREE === 'undefined') {
+    if (attempts > 50) {
+      const errorMsg = 'THREE.js failed to load. Check CDN connection.';
+      console.error(errorMsg);
+      // Show error on page
+      const errorContainer = document.getElementById('errorContainer');
+      if (errorContainer) {
+        errorContainer.classList.remove('hidden');
+        document.getElementById('errorContent').textContent = errorMsg;
+      }
+      return;
+    }
+    if (attempts % 10 === 0) {
+      console.log('Waiting for THREE.js... attempt', attempts);
+    }
+    setTimeout(() => waitForTHREE(attempts + 1), 100);
+    return;
+  }
+  console.log('THREE.js loaded successfully after', attempts, 'attempts');
+  initializeApp();
+}
+
+// Initialize after THREE is available
+function initializeApp() {
+  console.log('Initializing app');
+  try {
+    initScene();
+    console.log('Scene initialized');
+    setupFormListener();
+    console.log('Form listener setup complete');
+  } catch (error) {
+    console.error('Initialization error:', error);
+  }
+}
+
+// Initialize on page load - handle both DOMContentLoaded and already-loaded cases
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded fired');
+    waitForTHREE();
+  });
+} else {
+  console.log('DOM already loaded, initializing directly');
+  waitForTHREE();
+}

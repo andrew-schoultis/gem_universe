@@ -1,32 +1,25 @@
-# 📘 Assignment: Data Analysis
+# � Gem Universe - AI-Powered Gem Image Generator
 
-## 🎯 Objective
+## 🎯 Overview
 
-Students will learn the basics of data analysis using Python. They will load, explore, and analyze a dataset to extract meaningful insights.
+**Gem Universe** is an innovative AI-powered web application that generates stunning, realistic images of gemstones based on user descriptions. Simply describe the gem you envision—its color, shape, clarity, rarity, and special properties—and our advanced AI will create a beautiful, customized image of your gem.
 
-## 📝 Tasks
+## ✨ Features
 
-### 🛠️ Data Loading and Exploration
+- **AI-Powered Image Generation** - Uses state-of-the-art AI models to create realistic gem images
+- **User-Friendly Interface** - Simple text input for gem descriptions
+- **Realistic Rendering** - Generates high-quality images with accurate gemstone materials and properties
+- **Three.js Visualization** - Advanced 3D rendering capabilities for interactive gem exploration
 
-#### Description
-Load a provided CSV dataset and perform basic exploration to understand its structure and contents.
+## 🚀 How It Works
 
-#### Requirements
-Completed program should:
+1. **Describe Your Gem** - Enter a detailed description of the gemstone you'd like to create
+2. **Send to AI** - Submit your description to our AI engine
+3. **Get Results** - Receive a beautifully rendered image of your custom gemstone
 
-- Load a CSV file using Python (e.g., with pandas)
-- Display the first 5 rows of the dataset
-- Show summary statistics (mean, median, etc.) for numeric columns
+## 🎨 Use Cases
 
-
-### 🛠️ Data Visualization and Insights
-
-#### Description
-Create visualizations to help understand the data and summarize key findings.
-
-#### Requirements
-Completed program should:
-
-- Generate at least two different types of plots (e.g., histogram, scatter plot)
-- Identify and describe at least two insights or trends from the data
-- Save the plots as image files
+- Design custom gemstones for jewelry concepts
+- Visualize fictional or fantasy gems
+- Explore different gemstone varieties and properties
+- Educational tool for learning about gemology
