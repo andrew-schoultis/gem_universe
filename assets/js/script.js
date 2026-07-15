@@ -89,13 +89,13 @@ function createGemGeometry(shape = 'diamond') {
   if (shape === 'diamond') {
     // Create angular diamond/brilliant cut gem - tall pyramid-like shape
     geometry = new THREE.ConeGeometry(0.7, 1.4, 8, 4);
-  } else if (shape === 'emerald') {
+  } else if (shape === 'cube') {
     // Rectangular cushion cut
     geometry = new THREE.BoxGeometry(0.6, 0.9, 0.45, 8, 8, 8);
-  } else if (shape === 'round') {
+  } else if (shape === 'sphere') {
     // Round brilliant cut
     geometry = new THREE.SphereGeometry(0.8, 48, 48);
-  } else if (shape === 'marquise') {
+  } else if (shape === 'fancy') {
     // Elongated diamond shape - almond/eye shape
     const points = [];
     for (let i = 0; i < 48; i++) {
@@ -132,12 +132,12 @@ function createGem() {
     metalness: gemProperties.metalness,
     roughness: Math.max(0.02, gemProperties.roughness * 0.3), // Much shinier
     clearcoat: 1.0,
-    clearcoatRoughness: 0.05, // Very shiny clear coat
+    clearcoatRoughness: 0.15, // Very shiny clear coat
     ior: 2.42, // Refractive index of diamond
     transmission: 0.95, // More transparent
     thickness: 1.0,
-    envMapIntensity: 2.0, // Stronger reflections
-    reflectivity: 1.0,
+    envMapIntensity: 1.0, // Stronger reflections
+    reflectivity: 3.0,
     side: THREE.DoubleSide,
   });
   
