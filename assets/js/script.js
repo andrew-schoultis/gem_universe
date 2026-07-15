@@ -235,15 +235,16 @@ function parseGemDescription(description) {
   }
   
   // Shape detection
-if (desc.includes('round')) {
+  if (desc.includes('round') || desc.includes('brilliant') || desc.includes('sphere') || desc.includes('ball')) {
     gemProperties.shape = 'sphere';
-} else if (desc.includes('emerald')) {
+  } else if (desc.includes('emerald') || desc.includes('asscher') || desc.includes('cushion') || desc.includes('square')) {
     gemProperties.shape = 'cube';
-} else if (desc.includes('marquise')) {
+  } else if (desc.includes('marquise') || desc.includes('oval') || desc.includes('pear') || desc.includes('fancy') || desc.includes('almond')) {
     gemProperties.shape = 'fancy';
-} else {
+  } else {
+    // Default to diamond/cone for classic cuts
     gemProperties.shape = 'diamond';
-}
+  }
 
   
   // Clarity/Transparency detection
