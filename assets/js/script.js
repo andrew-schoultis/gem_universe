@@ -188,18 +188,18 @@ function createGem() {
 const material = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(gemProperties.color),
 
-    transmission: 0.98,
-    thickness: 1.5,
+    transmission: 0.85,
+    thickness: 0.4,
 
-    roughness: 0.02,
+    roughness: 0.3,
     metalness: 0.0,
 
-    clearcoat: 1.0,
+    clearcoat: 0.5,
     clearcoatRoughness: 0.02,
 
     ior: 2.42,
 
-    envMapIntensity: 0.35,
+    envMapIntensity: 1.0,
 
     side: THREE.FrontSide
 });
@@ -248,10 +248,10 @@ if (desc.includes('round')) {
   
   // Clarity/Transparency detection
   if (desc.includes('opaque') || desc.includes('cloudy')) {
-    gemProperties.roughness = 0.6;
+    gemProperties.roughness = 0.06;
     gemProperties.metalness = 0.3;
   } else if (desc.includes('clear') || desc.includes('transparent')) {
-    gemProperties.roughness = 0.05;
+    gemProperties.roughness = 0.005;
     gemProperties.metalness = 0.0;
   }
   
