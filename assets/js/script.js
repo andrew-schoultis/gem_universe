@@ -87,26 +87,29 @@ function createGemGeometry(shape = 'diamond') {
   let geometry;
   
   if (shape === 'diamond') {
-    // Create diamond/brilliant cut gem
-    geometry = new THREE.IcosahedronGeometry(0.8, 4);
+    // Create angular diamond/brilliant cut gem - tall pyramid-like shape
+    geometry = new THREE.ConeGeometry(0.7, 1.4, 8, 4);
   } else if (shape === 'emerald') {
     // Rectangular cushion cut
-    geometry = new THREE.BoxGeometry(0.6, 0.9, 0.45);
+    geometry = new THREE.BoxGeometry(0.6, 0.9, 0.45, 8, 8, 8);
   } else if (shape === 'round') {
     // Round brilliant cut
-    geometry = new THREE.SphereGeometry(0.8, 32, 32);
+    geometry = new THREE.SphereGeometry(0.8, 48, 48);
   } else if (shape === 'marquise') {
-    // Elongated diamond shape
+    // Elongated diamond shape - almond/eye shape
     const points = [];
-    for (let i = 0; i < 32; i++) {
-      const angle = (i / 32) * Math.PI * 2;
-      const x = Math.cos(angle) * 1.2;
+    for (let i = 0; i < 48; i++) {
+      const angle = (i / 48) * Math.PI * 2;
+      // Create an almond/marquise curve using sine wave
+      const curve = 0.3 + 0.5 * Math.cos(angle);
+      const x = Math.cos(angle) * curve * 1.2;
       const y = Math.sin(angle) * 0.8;
       points.push(new THREE.Vector2(x, y));
     }
-    geometry = new THREE.LatheGeometry(points, 32);
+    geometry = new THREE.LatheGeometry(points, 48);
   } else {
-    geometry = new THREE.OctahedronGeometry(0.8, 2);
+    // Fallback to octahedron (also angular)
+    geometry = new THREE.OctahedronGeometry(0.8, 5);
   }
   
   return geometry;
