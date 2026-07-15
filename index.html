@@ -3,57 +3,253 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mergington High School - Computer Science</title>
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <title>Gem Universe - AI Gem Descriptor</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 100%;
+        padding: 40px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        color: #333;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #666;
+        font-size: 1.1em;
+        margin-bottom: 5px;
+      }
+
+      .tagline {
+        color: #999;
+        font-size: 0.95em;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        color: #333;
+        font-weight: 600;
+        font-size: 1.05em;
+      }
+
+      textarea {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 1em;
+        resize: vertical;
+        min-height: 150px;
+        transition: border-color 0.3s ease;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s linear infinite;
+        margin-right: 10px;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .result {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+      }
+
+      .result h2 {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      .result-content {
+        color: #555;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .error {
+        background: #fee;
+        border-left-color: #d32f2f;
+        color: #d32f2f;
+      }
+
+      .error h2 {
+        color: #d32f2f;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-text">
-            <h1 id="course-title">Computer Science</h1>
-            <p id="course-info">Loading course information...</p>
-            <p id="course-description" class="course-desc">Access your assignments and course materials below.</p>
-          </div>
-          <div class="header-mascot">
-            <img src="assets/images/codercat.jpg" alt="Codercat" class="octocat-mascot" />
-          </div>
+    <div class="container">
+      <header>
+        <h1>💎 Gem Universe</h1>
+        <p class="subtitle">AI-Powered Gem Descriptor</p>
+        <p class="tagline">Describe a gem and let AI bring it to life</p>
+      </header>
+
+      <form id="gemForm">
+        <div class="form-group">
+          <label for="gemDescription">Describe Your Gem</label>
+          <textarea
+            id="gemDescription"
+            placeholder="Enter a detailed description of the gem you'd like to create. Include details like color, shape, clarity, rarity, and any special properties..."
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn">
+          Send to AI
+        </button>
+      </form>
+
+      <div id="resultContainer" class="hidden">
+        <div class="result">
+          <h2>AI Response</h2>
+          <div class="result-content" id="resultContent"></div>
         </div>
       </div>
-    </header>
 
-    <main class="main">
-      <div class="container">
-        <!-- Next Due Assignment Section -->
-        <section class="next-due-section">
-          <h2><span class="highlight-text">📅</span> Assignment Due Soon</h2>
-          <div id="next-due-assignment" class="next-due-card">
-            <div class="loading">Loading next assignment...</div>
-          </div>
-        </section>
-
-        <!-- All Assignments Section -->
-        <section class="assignments">
-          <h2>All Assignments</h2>
-          <div id="assignments-list" class="assignments-list">
-            <!-- Assignments will be loaded dynamically -->
-            <div class="loading">Loading assignments...</div>
-          </div>
-        </section>
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-content">
-          <p>&copy; 2025 Mergington High School</p>
-          <div class="footer-octocat">
-            <img src="assets/images/codercat.jpg" alt="Footer Codercat" class="footer-mascot" />
-          </div>
+      <div id="errorContainer" class="hidden">
+        <div class="result error">
+          <h2>Error</h2>
+          <div class="result-content" id="errorContent"></div>
         </div>
       </div>
-    </footer>
+    </div>
 
-    <script src="assets/js/script.js"></script>
+    <script>
+      const form = document.getElementById('gemForm');
+      const textarea = document.getElementById('gemDescription');
+      const submitBtn = document.getElementById('submitBtn');
+      const resultContainer = document.getElementById('resultContainer');
+      const errorContainer = document.getElementById('errorContainer');
+      const resultContent = document.getElementById('resultContent');
+      const errorContent = document.getElementById('errorContent');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const description = textarea.value.trim();
+        if (!description) return;
+
+        // Hide previous results
+        resultContainer.classList.add('hidden');
+        errorContainer.classList.add('hidden');
+
+        // Show loading state
+        submitBtn.disabled = true;
+        const originalText = submitBtn.textContent;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span>Processing...';
+
+        try {
+          // Replace this with your actual AI API endpoint
+          const response = await fetch('/api/describe-gem', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ description }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          // Display result
+          resultContent.textContent = data.response || data.message || JSON.stringify(data, null, 2);
+          resultContainer.classList.remove('hidden');
+        } catch (error) {
+          // Display error
+          errorContent.textContent = `Error: ${error.message}\n\nNote: Make sure you have configured the AI API endpoint at /api/describe-gem`;
+          errorContainer.classList.remove('hidden');
+        } finally {
+          // Restore button
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      });
+    </script>
   </body>
 </html>
