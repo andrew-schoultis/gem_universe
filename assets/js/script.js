@@ -67,7 +67,7 @@ function initScene() {
 // Add realistic lighting for gemstone rendering
 function addLighting() {
   // Main directional light (key light)
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  const keyLight = new THREE.DirectionalLight(0xffffff, .6);
   keyLight.position.set(5, 5, 5);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.width = 2048;
@@ -85,7 +85,7 @@ function addLighting() {
   scene.add(rimLight);
   
   // Ambient light for base illumination
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
   scene.add(ambientLight);
 }
 
@@ -112,9 +112,10 @@ function setupEnvironment(renderer, scene) {
     180
   );
 
-  glow.addColorStop(0.0, '#666666');
-  glow.addColorStop(0.3, '#333344');
-  glow.addColorStop(1.0, '#050510');
+glow.addColorStop(0.0, '#ffffff');
+glow.addColorStop(0.15, '#bbbbff');
+glow.addColorStop(0.4, '#333366');
+glow.addColorStop(1.0, '#050510');
 
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
