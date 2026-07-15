@@ -40,11 +40,18 @@ function initScene() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowShadowMap;
   renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
   container.appendChild(renderer.domElement);
   console.log('Renderer initialized and added to container, size:', width, 'x', height);
   
   // Add lighting - realistic gem lighting setup
   addLighting();
+  
+  // Setup smooth environment for clean reflections
+  setupEnvironment(renderer, scene);
   
   // Create initial gem
   createGem();
@@ -80,6 +87,57 @@ function addLighting() {
   // Ambient light for base illumination
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
   scene.add(ambientLight);
+}
+
+// Create a smooth environment map for gemstone reflections
+function setupEnvironment(renderer, scene) {
+  // Create canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 256;
+
+  const ctx = canvas.getContext('2d');
+
+  // Dark background
+  ctx.fillStyle = '#050510';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Soft radial light source
+  const glow = ctx.createRadialGradient(
+    canvas.width * 0.5,
+    canvas.height * 0.3,
+    10,
+    canvas.width * 0.5,
+    canvas.height * 0.3,
+    180
+  );
+
+  glow.addColorStop(0.0, '#666666');
+  glow.addColorStop(0.3, '#333344');
+  glow.addColorStop(1.0, '#050510');
+
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Convert canvas to texture
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+
+  // Generate PMREM for high quality reflections
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+
+  const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+
+  // Apply environment
+  scene.environment = envMap;
+
+  // Keep background dark
+  scene.background = new THREE.Color(0x050510);
+
+  // Cleanup
+  texture.dispose();
+  pmremGenerator.dispose();
 }
 
 // Create gem geometry with realistic diamond cut
@@ -126,20 +184,24 @@ function createGem() {
   const geometry = createGemGeometry(gemProperties.shape);
   console.log('Geometry created');
   
-  // Realistic gemstone material using physical material with enhanced shine
-  const material = new THREE.MeshPhysicalMaterial({
+const material = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(gemProperties.color),
-    metalness: gemProperties.metalness,
-    roughness: Math.max(0.02, gemProperties.roughness * 0.3), // Much shinier
+
+    transmission: 0.98,
+    thickness: 1.5,
+
+    roughness: 0.02,
+    metalness: 0.0,
+
     clearcoat: 1.0,
-    clearcoatRoughness: 0.15, // Very shiny clear coat
-    ior: 2.42, // Refractive index of diamond
-    transmission: 0.95, // More transparent
-    thickness: 1.0,
-    envMapIntensity: 1.0, // Stronger reflections
-    reflectivity: 3.0,
-    side: THREE.DoubleSide,
-  });
+    clearcoatRoughness: 0.02,
+
+    ior: 2.42,
+
+    envMapIntensity: 0.35,
+
+    side: THREE.FrontSide
+});
   
   gem = new THREE.Mesh(geometry, material);
   gem.castShadow = true;
@@ -172,15 +234,16 @@ function parseGemDescription(description) {
   }
   
   // Shape detection
-  if (desc.includes('round')) {
-    gemProperties.shape = 'round';
-  } else if (desc.includes('emerald')) {
-    gemProperties.shape = 'emerald';
-  } else if (desc.includes('marquise')) {
-    gemProperties.shape = 'marquise';
-  } else {
+if (desc.includes('round')) {
+    gemProperties.shape = 'sphere';
+} else if (desc.includes('emerald')) {
+    gemProperties.shape = 'cube';
+} else if (desc.includes('marquise')) {
+    gemProperties.shape = 'fancy';
+} else {
     gemProperties.shape = 'diamond';
-  }
+}
+
   
   // Clarity/Transparency detection
   if (desc.includes('opaque') || desc.includes('cloudy')) {
