@@ -191,7 +191,7 @@ const material = new THREE.MeshPhysicalMaterial({
     transmission: 0.85,
     thickness: 0.4,
 
-    roughness: 0.3,
+    roughness: 0.02,
     metalness: 0.0,
 
     clearcoat: 0.5,
