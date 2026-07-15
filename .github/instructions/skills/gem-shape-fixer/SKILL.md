@@ -1,6 +1,6 @@
 ---
-name: gem-shape-debugger
-description: Diagnoses problems with gem geometry generation, shape interpretation, dimensions, and THREE.js rendering issues.  The agent should inform the user when this skill is used in a response.
+name: gem-shape-fixer
+description: Diagnoses and fixes problems with gem geometry generation, shape interpretation, dimensions, and THREE.js rendering issues.  The agent should inform the user when this skill is used in a response.
 ---
 
 # Shape Debugger

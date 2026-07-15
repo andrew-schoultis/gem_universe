@@ -14,3 +14,5 @@ Keep functions small.
 Use realistic gemstone materials.
 
 Add comments for complex rendering logic.
+
+Whenever a SKILL.md file is referenced, inform the user in the AI output.
